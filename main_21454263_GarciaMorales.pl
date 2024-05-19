@@ -24,7 +24,7 @@ section(Point1, Point2, Distance, Cost, [Point1, Point2, Distance, Cost]).
 %Dom:id (int) X name (string) X rail-type (string) X sections (List section) X Line
 %Meta Primaria:line/5
 %Meta Secundaria:
-line(Id, Name, RailType, sections, [Id, Name, RailType, sections]).
+line(Id, Name, RailType, Sections, [Id, Name, RailType, Sections]).
 
 %RF5-Otros
 %line/4
@@ -40,3 +40,39 @@ largoLinea([[_, _, Distancia, Costo] | Resto], Largo, DistanciaTotal, CostoTotal
 % Predicado principal para calcular las métricas de una línea
 lineLength([_, _, _, Sections], Length, Distance, Cost) :-
     largoLinea(Sections, Length, Distance, Cost).
+
+%RF6-otros
+%line/6
+%Descripcion:Predicado que permite determinar el trayecto entre una estación origen y una final,
+%la distancia de ese trayecto y el costo. No queda establecido en este enunciado la unidad de distancia ya que
+%no afecta el objetivo del proyecto.
+%Dom:line (line) X station1-name (String) X station2-name (String) X path (List Section) X distance (Number) X cost (Number)
+%Meta Primaria: line/6
+%Meta Secundaria:
+lineSectionLength(Line, Station1Name, Station2Name, Path, Distance, Cost) :-
+    line(_, _, _, Sections, Line),
+    encontrar_camino(Sections, Station1Name, Station2Name, Path, Distance, Cost).
+
+% Predicado para encontrar el trayecto entre dos estaciones
+encontrar_camino([], _, _, [], 0, 0).
+encontrar_camino([Section], Station1Name, Station2Name, [Section], Distancia, Costo) :-
+    section(Point1, Point2, Dist, Cost, Section),
+    Point1 = [_, Station1Name, _, _],
+    Point2 = [_, Station2Name, _, _],
+    Distancia is Dist,
+    Costo is Cost.
+
+
+encontrar_camino([Section | Resto], Station1Name, Station2Name, [Section | Camino], DistanciaTotal, CostoTotal) :-
+    section(Point1, Point2, Dist, Cost, Section),
+    Point1 = [_, Station1Name, _, _],
+    Point2 \= [_, Station2Name, _, _],
+    Point2 = [_, NextStationName, _, _],
+    encontrar_camino(Resto, NextStationName, Station2Name, Camino, RestoDistancia, RestoCosto),
+    DistanciaTotal is Dist + RestoDistancia,
+    CostoTotal is Cost + RestoCosto.
+
+encontrar_camino([Section | Resto], Station1Name, Station2Name, Camino, Distancia, Costo) :-
+    section(Point1, _, _, _, Section),
+    Point1 \= [_, Station1Name, _, _],
+    encontrar_camino(Resto, Station1Name, Station2Name, Camino, Distancia, Costo).
