@@ -76,3 +76,11 @@ encontrar_camino([Section | Resto], Station1Name, Station2Name, Camino, Distanci
     section(Point1, _, _, _, Section),
     Point1 \= [_, Station1Name, _, _],
     encontrar_camino(Resto, Station1Name, Station2Name, Camino, Distancia, Costo).
+
+
+%RF7-otros
+
+lineAddSection(Line, Section, LineOut):-
+   \+ member(Section, Line),
+   append(Line,[Section], LineOut).
+
