@@ -79,8 +79,20 @@ encontrar_camino([Section | Resto], Station1Name, Station2Name, Camino, Distanci
 
 
 %RF7-otros
-
+%line/3
+%Descripcion:  Predicado que permite añadir tramos a una línea
+%Dom:line (Line) X section (Section) X lineOut (Line)
+%Meta Primaria: line/3
+%Meta Secundaria:
 lineAddSection(Line, Section, LineOut):-
    \+ member(Section, Line),
    append(Line,[Section], LineOut).
+
+%RF8-otros
+%line/
+%Descripcion:
+%Dom:
+%Meta Primaria:
+%Meta Secundaria:
+
 
