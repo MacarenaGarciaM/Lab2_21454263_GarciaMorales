@@ -96,3 +96,13 @@ lineAddSection(Line, Section, LineOut):-
 %Meta Secundaria:
 
 
+%RF9-Constructor
+%pcar/5
+%Descripcion: Permite crear los carros de pasajeros que conforman un convoy. Los carros pueden ser de tipo terminal (tr) o central (ct).
+%Dom:id (int) X capacity (positive integer) X model (string) X type (car-type) X PCar
+%Meta Primaria:pcar/5
+%Meta Secundaria:
+
+pcar(Id, Capacity, Model, Type, [Id, Capacity, Model, Type]):-
+    member(Type,["tr", "ct"]).
+
