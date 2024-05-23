@@ -104,5 +104,54 @@ lineAddSection(Line, Section, LineOut):-
 %Meta Secundaria:
 
 pcar(Id, Capacity, Model, Type, [Id, Capacity, Model, Type]):-
-    member(Type,["tr", "ct"]).
+    member(Type,[tr, ct]).
 
+
+%RF10- Constructor
+%train/
+%Descripcion:
+%Dom:id (int) X maker (string) X rail-type (string) X speed (positive number) X pcars (Lista de PCar) X Train
+%Meta Primaria:
+%Meta Secundaria:
+
+
+primerPcarValido([Pcar1| _]) :-
+    pcar(_,_,_,Type, Pcar1),
+    Type = tr.
+primerPcarValido([]) :- !.
+primerPcarValido([]).
+
+ultimoPcarValido(PCars) :-
+    reverse(PCars, ReversePCars),
+    primerPcarValido(ReversePCars).
+
+restoPcars([]).
+restoPcars([[_, _, Type, _] | Resto]) :-
+    Type \= tr,
+    restoPcars(Resto).
+
+validarTren([]) :- !.
+validarTren(PCars) :-
+    primerPcarValido(PCars),
+    ultimoPcarValido(PCars),
+    restoPcars(PCars).
+
+train(Id, Maker, RailType, Speed, PCars, [Id, Maker, RailType, Speed, PCars]) :-
+    validarTren(PCars).
+
+%RF11-modificador
+%train/4
+%Descripcion:Función que permite añadir carros a un tren en una posición dada.
+%Dom:train (train) X pcar (pcar) X position (positive-integer U {0}) X Train
+%Meta Primaria:train/4
+%Meta Secundaria:
+
+
+insertarEnPosicion(Elemento, Lista, 0, [Elemento|Lista]).
+insertarEnPosicion(Elemento, [Pcar|Resto], Posicion, [Pcar|PcarNuevo]) :-
+    Posicion > 0,
+    NuevaPos is Posicion - 1,
+    insertarEnPosicion(Elemento, Resto, NuevaPos, PcarNuevo).
+
+trainAddCar([Id, Maker, RailType, Speed, PCars], Pcar, Position, [Id, Maker, RailType, Speed, PcarNuevo]) :-
+    insertarEnPosicion(Pcar, PCars, Position, PcarNuevo).
