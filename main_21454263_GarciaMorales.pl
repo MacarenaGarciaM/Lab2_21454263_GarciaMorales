@@ -155,3 +155,19 @@ insertarEnPosicion(Elemento, [Pcar|Resto], Posicion, [Pcar|PcarNuevo]) :-
 
 trainAddCar([Id, Maker, RailType, Speed, PCars], Pcar, Position, [Id, Maker, RailType, Speed, PcarNuevo]) :-
     insertarEnPosicion(Pcar, PCars, Position, PcarNuevo).
+
+%RF12-Modificador
+%trainRemoveCar/4
+%Descripción: Regla que elimina un vagón de un tren en una posición específica.
+%Dom: Train (List) X Pos (Int) X TrainOut (List)
+%Meta Primaria: trainRemoveCar/4
+%Meta Secundaria: eliminar/3
+eliminarEnPosicion([_|Resto], 0, Resto).
+eliminarEnPosicion([Pcar|Resto], Posicion, [Pcar|PcarNuevo]) :-
+    Posicion > 0,
+    NuevaPosicion is Posicion - 1,
+    eliminarEnPosicion(Resto, NuevaPosicion, PcarNuevo).
+
+
+trainRemoveCar([Id, Maker, RailType, Speed, PCars], Position, [Id, Maker, RailType, Speed, PcarNuevo]) :-
+    eliminarEnPosicion(PCars, Position, PcarNuevo).
