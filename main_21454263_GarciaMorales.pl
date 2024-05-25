@@ -1,3 +1,5 @@
+:- use_module('tda_station_21454263_garciamorales').
+
 %Rf2-Constructor
 %station/5
 % Descripcion:Predicado constructor de una estaciÃ³n de metro, las que
@@ -7,7 +9,7 @@
 %Meta Primaria:station/5
 %Meta Secundaria:
 station(Id, Name, Type, StopTime, [Id, Name, Type, StopTime]):-
-    member(Type, ["r", "m", "c", "t"]).
+    member(Type, [r, m, c, t]).
 
 %Rf3-Constructor
 %Section/5
@@ -26,18 +28,13 @@ section(Point1, Point2, Distance, Cost, [Point1, Point2, Distance, Cost]).
 %Meta Secundaria:
 line(Id, Name, RailType, Sections, [Id, Name, RailType, Sections]).
 
-%RF5-Otros
-%line/4
-%
-% Predicado auxiliar para calcular la longitud, distancia y costo totales de una lista de secciones
-largoLinea([], 0, 0, 0).
-largoLinea([[_, _, Distancia, Costo] | Resto], Largo, DistanciaTotal, CostoTotal) :-
-    largoLinea(Resto, RestoLargo, RestoDistancia, RestoCosto),
-    Largo is RestoLargo + 1,
-    DistanciaTotal is RestoDistancia + Distancia,
-    CostoTotal is RestoCosto + Costo.
+%RF5-Constructor
+%line/5
+%Descripcion:Predicado que permite determinar el largo total de una línea (cantidad de estaciones), la distancia (en la unidad de medida expresada en cada tramo) y su costo. No queda establecido en este enunciado la unidad de distancia ya que no afecta el objetivo del proyecto.
+%Dom:id (int) X name (string) X rail-type (string) X sections (List section) X Line
+%Meta Primaria:line/5
+%Meta Secundaria:
 
-% Predicado principal para calcular las métricas de una línea
 lineLength([_, _, _, Sections], Length, Distance, Cost) :-
     largoLinea(Sections, Length, Distance, Cost).
 
@@ -49,44 +46,24 @@ lineLength([_, _, _, Sections], Length, Distance, Cost) :-
 %Dom:line (line) X station1-name (String) X station2-name (String) X path (List Section) X distance (Number) X cost (Number)
 %Meta Primaria: line/6
 %Meta Secundaria:
+%
 lineSectionLength(Line, Station1Name, Station2Name, Path, Distance, Cost) :-
-    line(_, _, _, Sections, Line),
+    getSectionLine(Line, Sections),
     encontrar_camino(Sections, Station1Name, Station2Name, Path, Distance, Cost).
 
-% Predicado para encontrar el trayecto entre dos estaciones
-encontrar_camino([], _, _, [], 0, 0).
-encontrar_camino([Section], Station1Name, Station2Name, [Section], Distancia, Costo) :-
-    section(Point1, Point2, Dist, Cost, Section),
-    Point1 = [_, Station1Name, _, _],
-    Point2 = [_, Station2Name, _, _],
-    Distancia is Dist,
-    Costo is Cost.
+
+%RF7-modificador
+% lineAddSection/3
+% Descripción: Predicado que añade una sección a una línea si dicha sección no existe ya en la línea.
+% Dom: line (Line) X section (Section) X lineOut (Line)
+% Meta Primaria: lineAddSection/3
+% Meta Secundaria: member/2, addSection/3
+
+lineAddSection([Id, Name, RailType, Sections], Section, [Id, Name, RailType, NewSections]) :-
+    \+ member(Section, Sections),
+    agregarElemento(Sections, Section, NewSections).
 
 
-encontrar_camino([Section | Resto], Station1Name, Station2Name, [Section | Camino], DistanciaTotal, CostoTotal) :-
-    section(Point1, Point2, Dist, Cost, Section),
-    Point1 = [_, Station1Name, _, _],
-    Point2 \= [_, Station2Name, _, _],
-    Point2 = [_, NextStationName, _, _],
-    encontrar_camino(Resto, NextStationName, Station2Name, Camino, RestoDistancia, RestoCosto),
-    DistanciaTotal is Dist + RestoDistancia,
-    CostoTotal is Cost + RestoCosto.
-
-encontrar_camino([Section | Resto], Station1Name, Station2Name, Camino, Distancia, Costo) :-
-    section(Point1, _, _, _, Section),
-    Point1 \= [_, Station1Name, _, _],
-    encontrar_camino(Resto, Station1Name, Station2Name, Camino, Distancia, Costo).
-
-
-%RF7-otros
-%line/3
-%Descripcion:  Predicado que permite añadir tramos a una línea
-%Dom:line (Line) X section (Section) X lineOut (Line)
-%Meta Primaria: line/3
-%Meta Secundaria:
-lineAddSection(Line, Section, LineOut):-
-   \+ member(Section, Line),
-   append(Line,[Section], LineOut).
 
 %RF8-otros
 %line/
@@ -94,6 +71,15 @@ lineAddSection(Line, Section, LineOut):-
 %Dom:
 %Meta Primaria:
 %Meta Secundaria:
+
+
+isLine(Line) :-
+    Line=[_, _, _, Sections],
+    Sections \= [],
+    all_valid(Sections, valid_section),
+    connected_sections(Sections),
+    lineFirstStationType(Line),
+    lineLastStationType(Line).
 
 
 %RF9-Constructor
@@ -115,27 +101,6 @@ pcar(Id, Capacity, Model, Type, [Id, Capacity, Model, Type]):-
 %Meta Secundaria:
 
 
-primerPcarValido([Pcar1| _]) :-
-    pcar(_,_,_,Type, Pcar1),
-    Type = tr.
-primerPcarValido([]) :- !.
-primerPcarValido([]).
-
-ultimoPcarValido(PCars) :-
-    reverse(PCars, ReversePCars),
-    primerPcarValido(ReversePCars).
-
-restoPcars([]).
-restoPcars([[_, _, Type, _] | Resto]) :-
-    Type \= tr,
-    restoPcars(Resto).
-
-validarTren([]) :- !.
-validarTren(PCars) :-
-    primerPcarValido(PCars),
-    ultimoPcarValido(PCars),
-    restoPcars(PCars).
-
 train(Id, Maker, RailType, Speed, PCars, [Id, Maker, RailType, Speed, PCars]) :-
     validarTren(PCars).
 
@@ -146,13 +111,6 @@ train(Id, Maker, RailType, Speed, PCars, [Id, Maker, RailType, Speed, PCars]) :-
 %Meta Primaria:train/4
 %Meta Secundaria:
 
-
-insertarEnPosicion(Elemento, Lista, 0, [Elemento|Lista]).
-insertarEnPosicion(Elemento, [Pcar|Resto], Posicion, [Pcar|PcarNuevo]) :-
-    Posicion > 0,
-    NuevaPos is Posicion - 1,
-    insertarEnPosicion(Elemento, Resto, NuevaPos, PcarNuevo).
-
 trainAddCar([Id, Maker, RailType, Speed, PCars], Pcar, Position, [Id, Maker, RailType, Speed, PcarNuevo]) :-
     insertarEnPosicion(Pcar, PCars, Position, PcarNuevo).
 
@@ -162,12 +120,87 @@ trainAddCar([Id, Maker, RailType, Speed, PCars], Pcar, Position, [Id, Maker, Rai
 %Dom: Train (List) X Pos (Int) X TrainOut (List)
 %Meta Primaria: trainRemoveCar/4
 %Meta Secundaria: eliminar/3
-eliminarEnPosicion([_|Resto], 0, Resto).
-eliminarEnPosicion([Pcar|Resto], Posicion, [Pcar|PcarNuevo]) :-
-    Posicion > 0,
-    NuevaPosicion is Posicion - 1,
-    eliminarEnPosicion(Resto, NuevaPosicion, PcarNuevo).
 
 
 trainRemoveCar([Id, Maker, RailType, Speed, PCars], Position, [Id, Maker, RailType, Speed, PcarNuevo]) :-
     eliminarEnPosicion(PCars, Position, PcarNuevo).
+
+%RF13-Pertenencia
+%istrain/1
+%Descripcion: Predicado que permite determinar si un elemento es un tren válido, esto es, si el elemento tiene la estructura de tren y los carros que lo conforman son compatibles (mismo modelo) y
+%tienen una disposición coherente con carros terminales (tr) en los extremos y centrales (ct) en medio del convoy.
+%Dom:Train
+%Meta Primaria: istrain/1
+%Meta Secundaria:
+
+
+isTrain(Train):-
+    getTrainPcar(Train, Pcars),
+    validarTren(Pcars).
+
+%RF14-otros
+%trainCapacity/
+%Descripcion:Predicado que permite determinar la capacidad máxima de pasajeros del tren.
+%Dom:Train X capacity (Number)
+%Meta Primaria: trainCapacity/
+%Meta Secundaria:
+
+trainCapacity(Train, Capacity):-
+    getTrainPcar(Train, Pcars),
+    getCapacityPcars(Pcars, Capacity).
+
+%RF15-Constructor
+%driver/4
+%Descripcion:Predicado que permite crear un conductor cuya habilitación de conducción depende del fabricante de tren (train-maker)
+%Dom: id (int) X nombre (string) X train-maker (string) X Driver
+%Meta Primaria: driver/4
+%Meta Secundaria:
+driver(Id, Nombre, TrainMaker, [Id, Nombre, TrainMaker]).
+
+%RF16- Subway
+%subway/3
+%Descripcion: Predicado que permite crear una red de metro.
+%Dom:id (int) X nombre (string) X Subway
+%Meta Primaria: subway/3
+%Meta Secundaria:
+subway(Id, Nombre, [Id, Nombre]).
+
+%RF17-Modificador
+%subwayAddTrain/3
+%Descripcion:Predicado que permite añadir trenes a una red de metro.
+%Dom:sub (Subway) X trains (List Train) X SubwayOut (Subway)
+%Meta Primaria: subwayAddTrain/3
+%Meta Secundaria:
+
+
+% Predicado subwayAddTrain/5 para añadir trenes al metro
+subwayAddTrain(Subway, Trains, SubwayOut) :-
+    getIdsTrain(Trains, Ids),
+    unicoId(Ids),
+    append(Subway, Trains, SubwayOut).
+
+%RF18-Modificador
+%subwayAddLine/
+%Descripcion:
+%Dom:
+%Meta Primaria:
+%Meta Secundaria:
+
+subwayAddLine(Subway, Lines, SubwayOut):-
+    getLinesId(Lines, Ids),
+    unicoId(Ids),
+    append(Subway, Lines, SubwayOut).
+
+
+%RF19-Modificador
+%subwayAddDriver/2
+%Descripción:
+%Dom: Driver (List) X Id (Any)
+%Meta Primaria: get_Driver_Id/2
+
+subwayAddDriver(Subway, Drivers, SubwayOut):-
+    getDriversId(Drivers, Ids),
+    unicoId(Ids),
+    append(Subway, Drivers, SubwayOut).
+
+
