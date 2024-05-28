@@ -10,9 +10,9 @@
 %RF5-Auxilar
 %largoLinea/4
 %Descripción: auxiliar para obtener el largo de una linea
-%Dom:
+%Dom:Line(List) X Largo X Distancia X Costo
 %Meta Primaria: largoLinea/4
-
+%Meta Secundaria: No aplica
 largoLinea([], 0, 0, 0).
 largoLinea([[_, _, Distancia, Costo] | Resto], Largo, DistanciaTotal, CostoTotal) :-
     largoLinea(Resto, RestoLargo, RestoDistancia, RestoCosto),
@@ -25,7 +25,7 @@ largoLinea([[_, _, Distancia, Costo] | Resto], Largo, DistanciaTotal, CostoTotal
 %Descripción: auxiliar para obtener el las secciones de una liea
 %Dom: Line (list) X Sections (list)
 %Meta Primaria: getSectionLine/2
-
+%Meta Secundaria: line/5
 getSectionLine(Line, Sections):-
     line(_, _, _, Sections, Line).
 
@@ -62,9 +62,9 @@ encontrar_camino([Section | Resto], Station1Name, Station2Name, Camino, Distanci
 %RF7-Auxilar
 %lineFirstStationType/1
 % Descripción: revisa si la primera estacion de una linea cumple con sertipo t
-%Dom:
+%Dom: Line (list)
 %Meta Primaria:lineFirstStationType/1
-
+%Meta Secundaria: getSectionLine/2
 lineFirstStationType(Line) :-
     getSectionLine(Line, Sections),
     Sections = [[FirstStation|_]|_],
@@ -75,8 +75,10 @@ lineFirstStationType(Line) :-
 %lineLastStationType/1
 % Descripción: revisa si la ultima estacion de una linea cumple con
 % ser tipo t
-%Dom:
+%Dom:Line (list)
 %Meta Primaria:lineLastStationType/1
+%Meta Secundaria: getSectionLine/2
+
 lineLastStationType(Line) :-
     getSectionLine(Line, Sections),
     last(Sections, LastSection),
@@ -89,7 +91,7 @@ lineLastStationType(Line) :-
 %Descripción: Regla auxiliar que obtiene el ID de una línea.
 %Dom: Line (List) X Id (Any)
 %Meta Primaria: get_Line_Id/2
-
+%Meta Secundaria: line/5
 getLineId(Line, Id):-
     line(Id,_ ,_ ,_, Line).
 
@@ -98,7 +100,7 @@ getLineId(Line, Id):-
 %Descripción: Regla auxiliar que obtiene los IDs de una lista de líneas.
 %Dom: Lines (List) X Ids (List)
 %Meta Primaria: getLinesId/2
-%Meta Secundaria: get_Line_Id/2
+%Meta Secundaria: getLineId/2
 
 getLinesId([], []).
 getLinesId([Line | Rest], [Id | Ids]) :-

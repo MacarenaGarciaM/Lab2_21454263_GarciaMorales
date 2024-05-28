@@ -1,0 +1,139 @@
+station(1, "Los Heroes", t, 50, E1),
+station(2, "La moneda", r, 30, E2),
+station(3, "Universidad de Chile", t, 30, E3),
+%---Propios
+station(4, "Lo Cruzat", r, 30, E4),
+station(5, "Quilin", r, 50, E5),
+station(6, "Tobalaba", r, 50, E6),
+
+%---
+section(E1, E2, 500, 100, S0),
+section(E2, E3, 550, 100, S1),
+
+%--Propios
+section(E2, E4, 450, 100, S2),
+section(E4, E5, 500, 100, S3),
+section(E5, E6, 400, 100, S4),
+section(E2, E5, 450, 100, S5),
+section(E5, E3, 500, 100, S6),
+section(E6, E1, 400, 100, S7),
+%---
+line(1, "L1", "UIC 60 ASCE", [], L1),
+
+%---Propios
+line(2, "L2", "100 R.E.", [S0, S2, S3], L2),
+line(3, "L3", "UIC 60 ASCE", [S0, S5], L3),
+line(4, "L4", "100 R.E.", [S0, S1], L4),
+
+%--
+lineAddSection(L1, S0, L1_1),
+lineAddSection(L1_1, S1, L1_2),
+
+%--Propios
+lineAddSection(L2, S6, L2_1),
+lineAddSection(L3, S4, L3_1),
+lineAddSection(L3_1, S7, L3_2),
+
+%--
+isLine(L1_2),
+% isLine(L1_1), % False porque falta estación terminal
+
+%--Propios
+isLine(L2_1),
+isLine(L3_2),
+isLine(L4),
+
+%--Documento
+pcar(0, 90, "NS-74" , ct, PC0),
+pcar(1, 100, "NS-74", tr, PC1),
+pcar(2, 150, "NS-74", tr, PC2),
+pcar(3, 90, "NS-74", ct, PC3),
+pcar(4, 100, "AS-2014", ct, PC4),
+pcar(5, 100, "AS-2014", ct, PC5),
+pcar(6, 100, "AS-2016", ct, PC6),
+
+%--Propios
+pcar(7, 95, "NS-74", tr, PC7),
+pcar(8, 75, "AS-2014", ct, PC8),
+pcar(9, 200, "AS-2016", tr, PC9),
+
+%--Documento
+train( 0, "CAF", "UIC 60 ASCE", 60, [ ], T0),
+train( 1, "CAF", "UIC 60 ASCE", 70, [PC1, PC0, PC3, PC2], T1),
+
+%--Propios
+train( 2, "CAF", "100 R.E.", 65, [PC7, PC8, PC9], T7),
+train( 3, "CAF", "UIC 60 ASCE", 65, [PC7, PC8, PC0, PC3, PC9], T8),
+train( 4, "CAF", "100 R.E.", 65, [PC1, PC6, PC8, PC2], T9),
+
+%--Documento
+trainAddCar( T0, PC1, 0, T2),
+trainAddCar( T2, PC0, 1, T3),
+trainAddCar( T3, PC2, 2, T4),
+trainAddCar( T4, PC3, 2, T5),
+
+%--Propios
+trainAddCar( T7, PC0, 2, T10),
+trainAddCar( T8, PC4, 3, T11),
+trainAddCar( T9, PC3, 2, T12),
+
+%--Documento
+trainRemoveCar(T4, 2, T6),
+
+%--Propios
+trainRemoveCar(T9, 2, T13),
+trainRemoveCar(T8, 4, T14),
+trainRemoveCar(T10, 3, T15),
+
+%--Documento
+isTrain(T1),
+
+%--Propios
+isTrain(T7),
+isTrain(T8),
+isTrain(T9),
+
+%--Documento
+trainCapacity(T1, C),
+
+%--Propios
+trainCapacity(T7, Capacity_T7),
+trainCapacity(T8, Capacity_T8),
+trainCapacity(T9, Capacity_T9),
+
+
+%--Documento
+driver( 0, "name0", "CAF", D0),
+driver( 1, "Oliver Atom", "ALSTOM", D1),
+
+%--Propios
+driver( 2, "Ambar", "CAF", D2),
+driver( 3, "Javiera", "ALSTOM", D3),
+driver( 4, "Kristian", "ALSTOM", D4),
+%--
+subway(1, "Metro Santiago", Sub0),
+
+%--Propios
+subway(2, "Metro NYC", S10),
+subway(3, "Metro Londres", S11),
+subway(4, "Metro Chicago", S12),
+
+
+%--Propios
+subwayAddTrain(S10, [T7], S10_1),
+subwayAddTrain(S11, [T8], S11_1),
+subwayAddTrain(S12, [T9], S12_1),
+
+%--
+% subwayAddLine(Sub0, [L1_1], Sub2), % False porque la línea es inconsistente
+subwayAddLine(Sub0, [L1_2], Sub2),
+
+%--Propios
+subwayAddLine(S10_1, [L2], S10_2),
+subwayAddLine(S11_1, [L3], S11_2),
+subwayAddLine(S12_1, [L4], S12_2),
+
+%--Propios
+subwayAddDriver( S10_2, [D2], S10_3),
+subwayAddDriver( S11_2, [D3], S11_3),
+subwayAddDriver( S12_2, [D4], S12_3).
