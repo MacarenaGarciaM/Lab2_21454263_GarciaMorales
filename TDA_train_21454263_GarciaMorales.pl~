@@ -1,0 +1,69 @@
+:- module(tda_train_21454263_garciamorales, [
+    insertarEnPosicion/4,
+    eliminarEnPosicion/3,
+    getTrainPcar/2,
+    getIdTrain/2,
+    getIdsTrain/2,
+    unicoId/1
+]).
+%RF11-Auxiliar
+%insertarEnPosicion/4
+%Descripcion: Inserta un elemento en el tren en una posicion especifica
+%Dom:
+%Meta Primaria:insertarEnPosicion/4
+%Meta Secundaria:
+
+insertarEnPosicion(Elemento, Lista, 0, [Elemento|Lista]).
+insertarEnPosicion(Elemento, [Pcar|Resto], Posicion, [Pcar|PcarNuevo]) :-
+    Posicion > 0,
+    NuevaPos is Posicion - 1,
+    insertarEnPosicion(Elemento, Resto, NuevaPos, PcarNuevo).
+
+%RF12-Auxiliar
+%eliminarEnPosicion/4
+%Descripcion: elimina un elemento en el tren en una posicion especifica
+%Dom:
+%Meta Primaria:eliminarEnPosicion/4
+%Meta Secundaria:
+eliminarEnPosicion([_|Resto], 0, Resto).
+eliminarEnPosicion([Pcar|Resto], Posicion, [Pcar|PcarNuevo]) :-
+    Posicion > 0,
+    NuevaPosicion is Posicion - 1,
+    eliminarEnPosicion(Resto, NuevaPosicion, PcarNuevo).
+
+%RF13- Auxiliar
+%getTrainPcar/2
+%Descripcion: obtiene el pcar de un tren
+%Dom:
+%Meta Primaria:getTrainPcar/2
+%Meta Secundaria:
+getTrainPcar(Train, PCars):-
+    train(_, _, _, _, PCars, Train).
+
+%RF17-Auxiliar
+%getIdTrain/2
+%Descripcion:Predicado que obtiene el id de un tren
+%Dom:
+%Meta Primaria: getIdTrain/2
+%Meta Secundaria:
+
+getIdTrain(Train, Id):-
+    train(Id, _, _, _, _, Train).
+
+
+getIdsTrain([], []).
+getIdsTrain([Train|Resto], [Id|Ids]):-
+    getIdTrain(Train, Id),
+    getIdsTrain(Resto, Ids).
+
+%RF17-Auxiliar
+%unicoId/2
+%Descripcion:Verifica que los Id's de los trenes sean unicos
+%Dom:
+%Meta Primaria: unicoId/2
+%Meta Secundaria:
+unicoId(Ids):-
+    sort(Ids, IdsUnicos),
+    length(Ids, Len),
+    length(IdsUnicos, Len).
+

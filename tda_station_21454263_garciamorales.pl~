@@ -1,0 +1,10 @@
+:- module(tda_station_21454263_garciamorales, [valid_station/1]).
+%TDA STATION
+%RF7-Auxilar
+%valid_station/1
+%Descripción: verifica si una estacion es valida
+%Dom:
+%Meta Primaria:valid_station/1
+
+valid_station([_, _, Type|_]) :-
+    member(Type, [r, m, c, t]).
